@@ -2,3 +2,4 @@
 *.txt
 *.cnode
 *.nedge
+./gui/node_modules
