@@ -23,8 +23,8 @@ function createWindow () {
   }))
 
   // Open the DevTools.
-  mainWindow.maximize()
   mainWindow.webContents.openDevTools()
+  mainWindow.maximize()
 
   // Emitted when the window is closed.
   mainWindow.on('closed', function () {

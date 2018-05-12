@@ -1,7 +1,7 @@
 {
-  "name": "main",
+  "name": "gui",
   "version": "1.0.0",
-  "description": "this is a gui for shared-ride program",
+  "description": "this is a fucking second version of gui",
   "main": "main.js",
   "scripts": {
     "start": "electron ."
