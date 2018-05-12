@@ -1,8 +1,11 @@
 #include "Car.h"
+#include <iostream>
+
+using namespace std;
 
 //0 2 116.65644,39.89045,285434 116.68906,39.91686,121573 116.67723,40.11989,227465
 Car::Car(string s) {
-    int h = 0, index = 0;
+    int h = 0, index = 0, comma1, comma2;
     string tmp;
     for (int i = 0; i <= s.length(); i ++) {
         if (s[i] == ' ' or i == s.length()) {
@@ -19,9 +22,10 @@ Car::Car(string s) {
                     index ++;
                     break;
                 case 2:
-                    int comma1 = -1, comma2 = -1;
+                    comma1 = -1;
+                    comma2 = -1;
                     for (int j = 0; j < tmp.length(); j ++) {
-                        if (tmp[j] == ' ') {
+                        if (tmp[j] == ',') {
                             if (comma1 == -1) {
                                 comma1 = j;
                             } else {
@@ -36,9 +40,10 @@ Car::Car(string s) {
                     index ++;
                     break;
                 default:
-                    int comma1 = -1, comma2 = -1;
+                    comma1 = -1;
+                    comma2 = -1;
                     for (int j = 0; j < tmp.length(); j ++) {
-                        if (tmp[j] == ' ') {
+                        if (tmp[j] == ',') {
                             if (comma1 == -1) {
                                 comma1 = j;
                             } else {

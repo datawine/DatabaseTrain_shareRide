@@ -6,6 +6,10 @@
 using namespace std;
 
 class Car {
+
+public:
+    Car(string s);
+
     int no;
     int passenger_num;
 
@@ -14,12 +18,6 @@ class Car {
 
     int dest_rn[4];
     double dest_long_la[4][2];   
-
-public:
-    Car(string s);
-
-    void CarLL(double &a, double &b) { a = longitude; b = latitude; }
-    int CarNo() { return no; }
 };
 
 #endif

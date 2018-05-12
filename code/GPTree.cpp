@@ -2701,18 +2701,21 @@ int Ans::get_min_distance(int S, int T)
 	return tree.search_catch(S, T);
 }
 
+void Ans::getLL(int no, double &longt, double &lat) {
+	longt = coordinate[no].x;
+	lat = coordinate[no].y;
+}
+
+vector<int> Ans::getRange(int S, int R, vector<int>T) {
+	return tree.Range(S, R, T);
+}
+
 
 void Ans::output()
 {
 	for(int i = 0; i < coordinate.size(); ++i)
 		cout << i << " " << coordinate[i].x << " " << coordinate[i].y << endl; 
 }
-
-void Ans::getLL(int no, double &a, double &b) {
-	a = coordinate[no].x;
-	b = coordinate[no].y;
-}
-
 /*void Ans::test()
 {
 	cout << "test begin" << endl;
@@ -2758,4 +2761,3 @@ void Ans::getLL(int no, double &a, double &b) {
 
     return 0;
 }*/
-

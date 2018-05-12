@@ -14,8 +14,11 @@
 #include<queue>
 #include<sys/time.h>
 #include<metis.h>
+#include <vector>
 
 double Euclidean_Dist(int S,int T);
+
+using namespace std;
 
 class Ans
 {
@@ -33,6 +36,7 @@ public:
 	void output();
 
 	void getLL(int no, double &longt, double &lat);
+	vector<int> getRange(int S, int R, vector<int>T);
 
 };
 #endif
