@@ -5,6 +5,15 @@
 #include <ctime>
 #include <cstdlib>
 #include <iostream>
+#include <sys/socket.h>
+#include<stdio.h>
+#include<stdlib.h>
+#include<unistd.h>
+#include<errno.h>
+#include<sys/types.h>
+#include<sys/socket.h>
+#include<netinet/in.h>
+#include<string.h>
 
 using namespace std;
 
@@ -86,7 +95,50 @@ void calRoadDist(int start_index, int *list, int low, int high, int &m_d, int *s
     }
 }
 
+void echo_ser(int sock)
+{
+    char recvbuf[1024] = {0};
+    struct sockaddr_in peeraddr;
+    socklen_t peerlen;
+    int n;
+
+    while (1)
+    {
+        peerlen = sizeof(peeraddr);
+        memset(recvbuf, 0, sizeof(recvbuf));
+        n = recvfrom(sock, recvbuf, sizeof(recvbuf), 0,
+                     (struct sockaddr *)&peeraddr, &peerlen);
+        if (n == -1)
+        {
+            if (errno == EINTR)
+                continue;
+        }
+        else if(n > 0)
+        {
+            fputs(recvbuf, stdout);
+            sendto(sock, recvbuf, n, 0,
+                   (struct sockaddr *)&peeraddr, peerlen);
+        }
+    }
+    close(sock);
+}
+
 int main() {
+    int sock;
+    if ((sock = socket(PF_INET, SOCK_DGRAM, 0)) < 0)
+        cout << "socket error" << endl;
+
+    struct sockaddr_in servaddr;
+    memset(&servaddr, 0, sizeof(servaddr));
+    servaddr.sin_family = AF_INET;
+    servaddr.sin_port = htons(5188);
+    servaddr.sin_addr.s_addr = htonl(INADDR_ANY);
+
+    bind(sock, (struct sockaddr *)&servaddr, sizeof(servaddr));
+
+    echo_ser(sock);
+
+    /*
     srand((unsigned)time(NULL));
     clock_t t1, t2;
 
@@ -187,6 +239,6 @@ int main() {
     t2 = clock();
 
     cout << (double)(t2 - t1) / CLOCKS_PER_SEC << endl;
-
+    */
     return 0;
 }
