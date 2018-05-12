@@ -1,19 +1,21 @@
-#include "Car.h"
-#include "GPTree.h"
+//#include "Car.h"
+//#include "GPTree.h"
 #include <vector>
 #include <cmath>
 #include <ctime>
 #include <cstdlib>
 #include <iostream>
+#include <stdio.h>
+#include <stdlib.h>
+#include <sys/types.h>
 #include <sys/socket.h>
-#include<stdio.h>
-#include<stdlib.h>
+#include <netinet/in.h>
+#include <errno.h>
+#include <arpa/inet.h>
 #include<unistd.h>
-#include<errno.h>
-#include<sys/types.h>
-#include<sys/socket.h>
-#include<netinet/in.h>
-#include<string.h>
+#define SRVPORT 10005
+#define CONNECT_NUM 5
+#define MAX_NUM 80
 
 using namespace std;
 
@@ -50,7 +52,7 @@ double calEucDist(double longt1, double longt2, double lat1, double lat2) {
     dist = 2 * asin(sqrt(pow(x, 2) + pow(y, 2) + pow(z, 2)) / 2) * earth_r;
     return dist;
 }
-
+/*
 void loadCarFile(vector<Car> &c, vector<int> &rn_list) {
 	char buf[1024];
 	FILE* fp = fopen(car_fn, "r");
@@ -66,7 +68,7 @@ void loadCarFile(vector<Car> &c, vector<int> &rn_list) {
         rn_list.push_back(tmp_car.roadnet_posi);
     }
 }
-
+*/
 void swap(int &a,int &b){
     int temp = a;
     a = b;
@@ -95,48 +97,60 @@ void calRoadDist(int start_index, int *list, int low, int high, int &m_d, int *s
     }
 }
 
-void echo_ser(int sock)
-{
-    char recvbuf[1024] = {0};
-    struct sockaddr_in peeraddr;
-    socklen_t peerlen;
-    int n;
-
-    while (1)
-    {
-        peerlen = sizeof(peeraddr);
-        memset(recvbuf, 0, sizeof(recvbuf));
-        n = recvfrom(sock, recvbuf, sizeof(recvbuf), 0,
-                     (struct sockaddr *)&peeraddr, &peerlen);
-        if (n == -1)
-        {
-            if (errno == EINTR)
-                continue;
-        }
-        else if(n > 0)
-        {
-            fputs(recvbuf, stdout);
-            sendto(sock, recvbuf, n, 0,
-                   (struct sockaddr *)&peeraddr, peerlen);
-        }
-    }
-    close(sock);
-}
-
 int main() {
-    int sock;
-    if ((sock = socket(PF_INET, SOCK_DGRAM, 0)) < 0)
-        cout << "socket error" << endl;
+    int serverSock = -1, clientSock = -1;
+    struct sockaddr_in serverAddr;
 
-    struct sockaddr_in servaddr;
-    memset(&servaddr, 0, sizeof(servaddr));
-    servaddr.sin_family = AF_INET;
-    servaddr.sin_port = htons(5188);
-    servaddr.sin_addr.s_addr = htonl(INADDR_ANY);
+    serverSock = socket(AF_INET, SOCK_STREAM, 0);
+    if(serverSock < 0) {
+        printf("socket creation failed\n");
+        exit(-1);
+    }
+    printf("socket create successfully.\n");
 
-    bind(sock, (struct sockaddr *)&servaddr, sizeof(servaddr));
+    memset(&serverAddr, 0, sizeof(serverAddr));
+    serverAddr.sin_family = AF_INET;
+    serverAddr.sin_port = htons((u_short) SRVPORT);
+    serverAddr.sin_addr.s_addr = htons(INADDR_ANY);
+    bind(serverSock,(struct sockaddr *)&serverAddr, sizeof(struct sockaddr_in));
+    printf("Bind successful.\n");
 
-    echo_ser(sock);
+    if(listen(serverSock,10)==-1) {
+        printf("Listen error!\n");
+    }
+    printf("Start to listen!\n");
+
+    char revBuf[MAX_NUM]={0};
+    char sedBuf[MAX_NUM]={0};
+    int i = 0;
+    while(1)
+    {
+        clientSock = accept(serverSock, NULL, NULL);
+        while(1) {
+            if(read(clientSock,revBuf,MAX_NUM) == -1) {
+                printf("read error.\n");
+            }
+            else {
+                printf("Client:%s\n", revBuf);
+            }
+            if(strcmp(revBuf,"Quit") == 0 || strcmp(revBuf,"quit") == 0) {
+                strcpy(sedBuf,"Goodbye,my dear client!");
+            }
+            else {
+                strcpy(sedBuf,"Hello Client.");
+            }
+            if(write(clientSock, sedBuf, sizeof(sedBuf)) == -1) {
+                printf("Send error!\n");
+            }
+            if(strcmp(revBuf,"Quit") == 0 || strcmp(revBuf,"quit") == 0) {
+                break;
+            }
+            bzero(revBuf,sizeof(revBuf));
+            bzero(sedBuf,sizeof(sedBuf));
+        }
+        close(clientSock);
+    }
+    close(serverSock);
 
     /*
     srand((unsigned)time(NULL));
