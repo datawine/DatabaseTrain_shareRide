@@ -1,0 +1,1 @@
+g++ -lmetis -o main main.cpp Car.cpp GPTree.cpp

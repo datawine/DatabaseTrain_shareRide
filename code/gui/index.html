@@ -32,13 +32,33 @@
         </tr>
     </table>
 </div>
-<script type="text/javascript">
+<script>
+    var net = require('net');
+    var HOST = '127.0.0.1';
+    var PORT = 10005;
+    var client = new net.Socket();
+    // 为客户端添加“data”事件处理函数
+    // data是服务器发回的数据
+    client.on('data', function(data) {
+        console.log('DATA: ' + data);
+    });
+
+    // 为客户端添加“close”事件处理函数
+    client.on('close', function() {
+        console.log('Connection closed');
+        client.write("quit");
+    });
+
+    client.connect(PORT, HOST, function() {
+        console.log('CONNECTED TO: ' + HOST + ':' + PORT);
+    });
 
     var map = new AMap.Map("container", {
         resizeEnable: true
     });
     //为地图注册click事件获取鼠标点击出的经纬度坐标
     var clickEventListener = map.on('click', function(e) {
+        client.write(e.lnglat.getLng() + ',' + e.lnglat.getLat());
         document.getElementById("lnglat").value = e.lnglat.getLng() + ',' + e.lnglat.getLat()
     });
     var auto = new AMap.Autocomplete({
@@ -52,5 +72,6 @@
         }
     }
 </script>
+
 </body>
 </html>
