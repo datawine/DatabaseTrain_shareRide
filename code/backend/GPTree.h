@@ -37,6 +37,7 @@ public:
 
 	void getLL(int no, double &longt, double &lat);
 	vector<int> getRange(int S, int R, vector<int>T);
+	int getClose(double longt, double lat, double &res_longt, double &res_lat);
 
 };
 #endif

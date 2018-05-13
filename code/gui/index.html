@@ -7,8 +7,38 @@
     <title>鼠标拾取地图坐标</title>
     <link rel="stylesheet" href="http://cache.amap.com/lbs/static/main1119.css"/>
     <script type="text/javascript"
-            src="http://webapi.amap.com/maps?v=1.4.6&key=您申请的key值&plugin=AMap.Autocomplete"></script>
+            src="http://webapi.amap.com/maps?v=1.4.6&key=c42bdb8266a44d84f8f465d07b1aae1f&plugin=AMap.MouseTool"></script>
     <script type="text/javascript" src="http://cache.amap.com/lbs/static/addToolbar.js"></script>
+    <style>
+        .context_menu {
+            margin: 2px;
+            padding: 2px;
+            list-style-type: none;
+            position: relative;
+            background-color: rgb(255, 255, 255);
+            border: 1px solid rgb(175, 175, 175);
+            border-radius: 5px;
+            box-shadow: rgb(153, 153, 153) 2px 2px 8px;
+            white-space: nowrap;
+            cursor: pointer;
+        }
+        .context_menu li {
+            text-indent: 0.5em;
+            color: blue;
+            font-size: 13px;
+            font-family: verdana;
+            height: 20px;
+            line-height: 20px;
+            word-break: break-all;
+            white-space: nowrap;
+        }
+        .context_menu li.split_line {
+            border-bottom-color: rgb(204, 204, 204);
+            border-bottom-style: solid;
+            border-bottom-width: 1px;
+        }
+    </style>
+
 </head>
 <body>
 <div id="container"></div>
@@ -31,6 +61,9 @@
             </td>
         </tr>
     </table>
+</div>
+<div  class="button-group">
+    <input type="button" class="button" value="生成拼车结果" id="sendMsg"/>
 </div>
 <script>
     var net = require('net');
@@ -56,21 +89,77 @@
     var map = new AMap.Map("container", {
         resizeEnable: true
     });
-    //为地图注册click事件获取鼠标点击出的经纬度坐标
-    var clickEventListener = map.on('click', function(e) {
-        client.write(e.lnglat.getLng() + ',' + e.lnglat.getLat());
-        document.getElementById("lnglat").value = e.lnglat.getLng() + ',' + e.lnglat.getLat()
-    });
-    var auto = new AMap.Autocomplete({
-        input: "tipinput"
-    });
-    AMap.event.addListener(auto, "select", select);//注册监听，当选中某条记录时会触发
-    function select(e) {
-        if (e.poi && e.poi.location) {
-            map.setZoom(15);
-            map.setCenter(e.poi.location);
-        }
+
+    var start_marker, dest_marker;
+
+    var menu=new ContextMenu(map);
+    function ContextMenu(map) {
+        var me = this;
+        this.mouseTool = new AMap.MouseTool(map); //地图中添加鼠标工具MouseTool插件
+        this.contextMenuPositon = null;
+        var content = [];
+        content.push("<div>");
+        content.push("    <ul class='context_menu'>");
+        content.push("        <li onclick='menu.addAsStart()'>增加一个起点</li>");
+        content.push("        <li class='split_line' onclick='menu.addAsDest()'>增加一个终点</li>");
+        content.push("    </ul>");
+        content.push("</div>");
+        this.contextMenu = new AMap.ContextMenu({isCustom: true, content: content.join('')});//通过content自定义右键菜单内容
+        //地图绑定鼠标右击事件——弹出右键菜单
+        map.on('rightclick', function(e) {
+            me.contextMenu.open(map, e.lnglat);
+            me.contextMenuPositon = e.lnglat; //右键菜单位置
+        });
     }
+
+    ContextMenu.prototype.addAsStart = function () {
+        this.mouseTool.close();
+        console.log(start_marker);
+        if (typeof(start_marker) == "undefined") {
+                start_marker = new AMap.Marker({
+                map: map,
+                icon: "http://webapi.amap.com/theme/v1.3/markers/n/mark_r.png",
+                position: this.contextMenuPositon //基点位置
+            });
+        } else {
+            start_marker.setPosition(this.contextMenuPositon);
+        }
+        this.contextMenu.close();
+    }
+
+    ContextMenu.prototype.addAsDest = function () {
+        this.mouseTool.close();
+        console.log(dest_marker);
+        if (typeof(dest_marker) == "undefined") {
+            dest_marker = new AMap.Marker({
+                map: map,
+                icon: "http://webapi.amap.com/theme/v1.3/markers/n/mark_b.png",
+                position: this.contextMenuPositon //基点位置
+            });
+        } else {
+            dest_marker.setPosition(this.contextMenuPositon);
+        }
+        this.contextMenu.close();
+    }
+
+    ContextMenu.prototype.distanceMeasureMenu=function () {  //右键菜单距离量测
+        this.mouseTool.rule();
+        this.contextMenu.close();
+    }
+    ContextMenu.prototype.addMarkerMenu=function () {  //右键菜单添加Marker标记
+        this.mouseTool.close();
+        var marker = new AMap.Marker({
+            map: map,
+            position: this.contextMenuPositon //基点位置
+        });
+        this.contextMenu.close();
+    }
+
+    AMap.event.addDomListener(document.getElementById('sendMsg'), 'click', function() {
+        client.write(start_marker.getPosition() + ',' + 
+            dest_marker.getPosition);
+    }, false);
+    
 </script>
 
 </body>

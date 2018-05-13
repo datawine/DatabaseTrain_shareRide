@@ -1,4 +1,6 @@
 #include "Calculation.h"
+#include <fstream>
+#include <iostream>
 
 const double earth_r = 6371000.0;
 const double PI = acos(-1.0);
@@ -57,14 +59,20 @@ void calRoadDist(int start_index, int *list, int low, int high, int &m_d, int *s
 }
 
 void genRes(Ans &ans, vector<Car> &car_vec, vector<int> &rn_list, int start_no, int dest_no) {
+    ofstream out;
+    out.open("ans.json", ios::trunc);
+
     vector<int> c;
     c = ans.getRange(start_no, 10000, rn_list);
 
+    double car_longt, car_lat, tmp_longt, tmp_lat;
     int car_posi, passen_posi[4];
     int car_no, passen_num;
     int d1, d2, d3, d4;
     int list[4], new_way[4], old_way[4];
 
+    bool hasbefore = false;
+    out << "[" << endl;
     for (int i = 0; i < c.size(); i ++) {
         passen_num = car_vec[c[i]].passenger_num;
         if (passen_num < 4) {
@@ -101,11 +109,14 @@ void genRes(Ans &ans, vector<Car> &car_vec, vector<int> &rn_list, int start_no, 
             d4 = start_dist[1][passen_num];
 
             if ((d2 + d3 - d1 <= 10000) and (d3 - d4 <= 10000)) {
-                cout << "-----------------" << endl;
-                cout << "ans: " << endl;
-                cout << "car_no: " << car_posi << endl;
-                cout << "new_passenger_posi: " << start_no << " destination: " << dest_no << endl;
-                cout << "old_passenger_posi: " << endl;
+                if (!hasbefore)
+                    out << "{" << endl;
+                else
+                    out << ",{" << endl;
+                hasbefore = true;
+
+                /*
+                cout << "\"old_passenger_posi\": " << endl;
                 for (int j = 0; j < passen_num; j ++) {
                     cout << passen_posi[j] << endl;
                 }
@@ -116,20 +127,38 @@ void genRes(Ans &ans, vector<Car> &car_vec, vector<int> &rn_list, int start_no, 
                     else
                         cout << passen_posi[old_way[j - 1]] << "->" << passen_posi[old_way[j]] << " " << road_dist[old_way[j - 1]][old_way[j]] << endl;
                 }
-                cout << "new way: " << endl;
-                cout << car_posi << "->" << start_no << " " << d2 << endl;
+                */
+
+                out << "\"route\": [{" << endl;
+                ans.getLL(car_posi, car_longt, car_lat);
+                out << "\"lngt\": " << car_longt << "," << endl;
+                out << "\"lat\": " << car_lat << "}";
+//                out << "\"length\":" << d2 << "}";
+
+                ans.getLL(start_no, tmp_longt, tmp_lat);
+                out << ",{" << endl;
+                out << "\"lngt\": " << tmp_longt << "," << endl;
+                out << "\"lat\": " << tmp_lat << "}";
+
                 for (int j = 0; j <= passen_num; j ++) {
-                    if (j == 0)
-                        cout << start_no << "->" << passen_posi[new_way[0]] << " " << start_dist[1][new_way[0]] << endl;
-                    else
-                        cout << passen_posi[new_way[j - 1]] << "->" << passen_posi[new_way[j]] << " " << road_dist[new_way[j - 1]][new_way[j]] << endl;
+                    ans.getLL(passen_posi[new_way[j]], tmp_longt, tmp_lat);
+                    out << ",{" << endl;
+                    out << "\"lngt\": " << tmp_longt << "," << endl;
+                    out << "\"lat\": " << tmp_lat << "}";
                 }
 
+                out << "]" << endl;
+                out << "}";
+                /*
                 cout << "d1: " << d1 << endl; 
                 cout << "d2: " << d2 << endl; 
                 cout << "d3: " << d3 << endl; 
                 cout << "d4: " << d4 << endl; 
+                */
             }
         }
     }
+
+    out << "]" << endl;
+    out.close();
 }

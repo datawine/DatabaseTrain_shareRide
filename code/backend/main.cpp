@@ -48,18 +48,21 @@ int main() {
     serverSock = initSocket();
     char revBuf[MAX_NUM]={0};
     char sedBuf[MAX_NUM]={0};
+    string revMsg;
     while(1)
     {
         clientSock = accept(serverSock, NULL, NULL);
         while(1) {
             if(read(clientSock,revBuf,MAX_NUM) != -1) {
-                printf("Client:%s\n", revBuf);
+                revMsg = revBuf;
             } else {
                 break;
             }
             t1 = clock();
 
-            genRes(ans, car_vec, rn_list, start_no, dest_no);
+            cout << revMsg << endl;
+
+            //genRes(ans, car_vec, rn_list, start_no, dest_no);
 
             t2 = clock();
 

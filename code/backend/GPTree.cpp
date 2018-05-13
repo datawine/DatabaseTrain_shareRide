@@ -2716,6 +2716,21 @@ void Ans::output()
 	for(int i = 0; i < coordinate.size(); ++i)
 		cout << i << " " << coordinate[i].x << " " << coordinate[i].y << endl; 
 }
+
+int Ans::getClose(double longt, double lat, double &res_longt, double &res_lat) {
+	double min = 100000000.0, tmp;
+	int no = -1;
+	for (int i = 0; i < coordinate.size(); i ++) {
+		tmp = Distance_(longt, lat, coordinate[i].x, coordinate[i].y);
+		if (tmp < min) {
+			res_longt = coordinate[i].x;
+			res_lat = coordinate[i].y;
+			no = i;
+		}
+	}
+	return no;
+}
+
 /*void Ans::test()
 {
 	cout << "test begin" << endl;
