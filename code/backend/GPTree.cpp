@@ -2726,6 +2726,7 @@ int Ans::getClose(double longt, double lat, double &res_longt, double &res_lat) 
 			res_longt = coordinate[i].x;
 			res_lat = coordinate[i].y;
 			no = i;
+			min = tmp;
 		}
 	}
 	return no;

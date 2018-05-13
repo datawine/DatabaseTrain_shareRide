@@ -67,12 +67,15 @@ void genRes(Ans &ans, vector<Car> &car_vec, vector<int> &rn_list, int start_no, 
 
     double car_longt, car_lat, tmp_longt, tmp_lat;
     int car_posi, passen_posi[4];
-    int car_no, passen_num;
+    int passen_num;
     int d1, d2, d3, d4;
     int list[4], new_way[4], old_way[4];
 
     bool hasbefore = false;
     out << "[" << endl;
+
+    int cnt = 0;
+
     for (int i = 0; i < c.size(); i ++) {
         passen_num = car_vec[c[i]].passenger_num;
         if (passen_num < 4) {
@@ -109,31 +112,19 @@ void genRes(Ans &ans, vector<Car> &car_vec, vector<int> &rn_list, int start_no, 
             d4 = start_dist[1][passen_num];
 
             if ((d2 + d3 - d1 <= 10000) and (d3 - d4 <= 10000)) {
+                cnt ++;
+                if (cnt == 11)
+                    break;
                 if (!hasbefore)
                     out << "{" << endl;
                 else
                     out << ",{" << endl;
                 hasbefore = true;
 
-                /*
-                cout << "\"old_passenger_posi\": " << endl;
-                for (int j = 0; j < passen_num; j ++) {
-                    cout << passen_posi[j] << endl;
-                }
-                cout << "old way: " << endl;
-                for (int j = 0; j < passen_num; j ++) {
-                    if (j == 0)
-                        cout << car_posi << "->" << passen_posi[old_way[0]] << " " << start_dist[0][old_way[0]] << endl;
-                    else
-                        cout << passen_posi[old_way[j - 1]] << "->" << passen_posi[old_way[j]] << " " << road_dist[old_way[j - 1]][old_way[j]] << endl;
-                }
-                */
-
                 out << "\"route\": [{" << endl;
                 ans.getLL(car_posi, car_longt, car_lat);
                 out << "\"lngt\": " << car_longt << "," << endl;
                 out << "\"lat\": " << car_lat << "}";
-//                out << "\"length\":" << d2 << "}";
 
                 ans.getLL(start_no, tmp_longt, tmp_lat);
                 out << ",{" << endl;
@@ -149,12 +140,13 @@ void genRes(Ans &ans, vector<Car> &car_vec, vector<int> &rn_list, int start_no, 
 
                 out << "]" << endl;
                 out << "}";
-                /*
-                cout << "d1: " << d1 << endl; 
-                cout << "d2: " << d2 << endl; 
-                cout << "d3: " << d3 << endl; 
-                cout << "d4: " << d4 << endl; 
-                */
+
+                cout << "---------" << endl;
+                cout << car_posi << "->" << start_no << endl;
+                cout << start_no << "->" << passen_posi[new_way[0]] << endl;
+                for (int j = 1; j <= passen_num; j ++) {
+                    cout << passen_posi[new_way[j - 1]] << "->" << passen_posi[new_way[j]] << endl;
+                }
             }
         }
     }

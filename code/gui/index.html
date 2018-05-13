@@ -6,6 +6,7 @@
     <meta name="viewport" content="initial-scale=1.0, user-scalable=no, width=device-width">
     <title>鼠标拾取地图坐标</title>
     <link rel="stylesheet" href="http://cache.amap.com/lbs/static/main1119.css"/>
+    <script src="jquery.min.js" type="text/javascript"></script>
     <script type="text/javascript"
             src="http://webapi.amap.com/maps?v=1.4.6&key=c42bdb8266a44d84f8f465d07b1aae1f&plugin=AMap.MouseTool"></script>
     <script type="text/javascript" src="http://cache.amap.com/lbs/static/addToolbar.js"></script>
@@ -64,8 +65,11 @@
 </div>
 <div  class="button-group">
     <input type="button" class="button" value="生成拼车结果" id="sendMsg"/>
+    <input type="button" class="button" value="画他妈的图" id="drawCar"/>
 </div>
 <script>
+    var routelist;
+
     var net = require('net');
     var HOST = '127.0.0.1';
     var PORT = 10005;
@@ -157,9 +161,29 @@
 
     AMap.event.addDomListener(document.getElementById('sendMsg'), 'click', function() {
         client.write(start_marker.getPosition() + ',' + 
-            dest_marker.getPosition);
+            dest_marker.getPosition());
     }, false);
     
+    AMap.event.addDomListener(document.getElementById('drawCar'), 'click', function() {
+        var rf = require("fs");  
+        var data = rf.readFileSync("../backend/ans.json","utf-8");  
+        routelist = JSON.parse(data);
+
+        for (var route in routelist) {
+            var r = routelist[route].route;
+            console.log(r);
+            console.log("drawing");
+            for (var spot in r) {
+                console.log(r[spot].lngt + "" + r[spot].lat);
+                var marker = new AMap.Marker({
+                    map: map,
+                    position: [r[spot].lngt, r[spot].lat] //基点位置
+                });
+                break;
+            }
+        }
+    }, false);
+
 </script>
 
 </body>

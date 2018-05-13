@@ -25,3 +25,24 @@ int initSocket() {
     
     return serverSock;
 }
+
+void parseData(string s, double &lngt1, double &lat1, double &lngt2, double &lat2) {
+    int h = 0;
+    int comma1 = -1, comma2 = -1, comma3 = -1;
+    for (int i = 0; i < s.length(); i ++) {
+        if (s[i] == ',') {
+            if (comma1 == -1) {
+                comma1 = i;
+            } else if (comma2 == -1) {
+                comma2 = i;
+            } else {
+                comma3 = i;
+            }
+        }
+    }
+    
+    lngt1 = atof(s.substr(0, comma1).c_str());
+    lat1 = atof(s.substr(comma1 + 1, comma2 - comma1 - 1).c_str());
+    lngt2 = atof(s.substr(comma2 + 1, comma3 - comma2 - 1).c_str());
+    lat2 = atof(s.substr(comma3 + 1, s.length() - comma3 - 1).c_str());    
+}

@@ -10,11 +10,16 @@
 #include <netinet/in.h>
 #include <errno.h>
 #include <arpa/inet.h>
+#include <string>
 
 #define SRVPORT 10005
 #define CONNECT_NUM 5
 #define MAX_NUM 80
 
+using namespace std;
+
 int initSocket();
+
+void parseData(string s, double &lngt1, double &lat1, double &lngt2, double &lat2);
 
 #endif

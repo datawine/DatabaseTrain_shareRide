@@ -45,6 +45,9 @@ int main() {
 
     int serverSock = -1, clientSock = -1;
 
+    double tmp_lngt1, tmp_lat1, tmp_lngt2, tmp_lat2;
+    double start_lngt, start_lat, dest_lngt, dest_lat; 
+
     serverSock = initSocket();
     char revBuf[MAX_NUM]={0};
     char sedBuf[MAX_NUM]={0};
@@ -62,8 +65,20 @@ int main() {
 
             cout << revMsg << endl;
 
-            //genRes(ans, car_vec, rn_list, start_no, dest_no);
+            parseData(revMsg, tmp_lngt1, tmp_lat1, tmp_lngt2, tmp_lat2);
 
+            cout << tmp_lngt1 << endl;
+            cout << tmp_lat1 << endl;
+            cout << tmp_lngt2 << endl;
+            cout << tmp_lat2 << endl;
+
+            start_no = ans.getClose(tmp_lngt1, tmp_lat1, start_lngt, start_lat);
+            dest_no = ans.getClose(tmp_lngt2, tmp_lat2, dest_lngt, dest_lat);
+
+            cout << "road_net_no:" << endl;
+            cout << start_no << " " << dest_no << endl;
+            genRes(ans, car_vec, rn_list, start_no, dest_no);
+ 
             t2 = clock();
 
             cout << (double)(t2 - t1) / CLOCKS_PER_SEC << endl;
@@ -77,7 +92,6 @@ int main() {
         close(clientSock);
     }
     close(serverSock);
-
 
     return 0;
 }
