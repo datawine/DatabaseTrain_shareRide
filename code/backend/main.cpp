@@ -1,22 +1,13 @@
-#include "Car.h"
-#include "GPTree.h"
-#include "Calculation.h"
 #include <vector>
 #include <ctime>
 #include <cstdlib>
+#include <cstdio>
 #include <iostream>
-#include <stdio.h>
-#include <stdlib.h>
-#include <sys/types.h>
-#include <sys/socket.h>
-#include <netinet/in.h>
-#include <errno.h>
-#include <arpa/inet.h>
-#include<unistd.h>
 
-#define SRVPORT 10005
-#define CONNECT_NUM 5
-#define MAX_NUM 80
+#include "Car.h"
+#include "GPTree.h"
+#include "Calculation.h"
+#include "Comm.h"
 
 using namespace std;
 
@@ -47,37 +38,16 @@ int main() {
     
     vector<Car> car_vec;
 
-    vector<int> c;
-    vector<int> rn_list;
+    vector<int> c, rn_list;
     loadCarFile(car_vec, rn_list);
 
     int start_no = 2345, dest_no = 2346;
 
     int serverSock = -1, clientSock = -1;
-    struct sockaddr_in serverAddr;
 
-    serverSock = socket(AF_INET, SOCK_STREAM, 0);
-    if(serverSock < 0) {
-        printf("socket creation failed\n");
-        exit(-1);
-    }
-    printf("socket create successfully.\n");
-
-    memset(&serverAddr, 0, sizeof(serverAddr));
-    serverAddr.sin_family = AF_INET;
-    serverAddr.sin_port = htons((u_short) SRVPORT);
-    serverAddr.sin_addr.s_addr = htons(INADDR_ANY);
-    bind(serverSock,(struct sockaddr *)&serverAddr, sizeof(struct sockaddr_in));
-    printf("Bind successful.\n");
-
-    if(listen(serverSock,10)==-1) {
-        printf("Listen error!\n");
-    }
-    printf("Start to listen!\n");
-
+    serverSock = initSocket();
     char revBuf[MAX_NUM]={0};
     char sedBuf[MAX_NUM]={0};
-    int i = 0;
     while(1)
     {
         clientSock = accept(serverSock, NULL, NULL);
