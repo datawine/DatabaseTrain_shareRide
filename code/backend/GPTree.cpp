@@ -2732,6 +2732,10 @@ int Ans::getClose(double longt, double lat, double &res_longt, double &res_lat) 
 	return no;
 }
 
+int Ans::find_path(int S, int T, vector<int> &order) {
+	return tree.find_path(S, T, order);
+}
+
 /*void Ans::test()
 {
 	cout << "test begin" << endl;

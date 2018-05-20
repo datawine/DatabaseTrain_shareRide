@@ -113,7 +113,7 @@ void genRes(Ans &ans, vector<Car> &car_vec, vector<int> &rn_list, int start_no, 
 
             if ((d2 + d3 - d1 <= 10000) and (d3 - d4 <= 10000)) {
                 cnt ++;
-                if (cnt == 11)
+                if (cnt == 21)
                     break;
                 if (!hasbefore)
                     out << "{" << endl;
@@ -121,24 +121,72 @@ void genRes(Ans &ans, vector<Car> &car_vec, vector<int> &rn_list, int start_no, 
                     out << ",{" << endl;
                 hasbefore = true;
 
+                vector<int> order;
+
                 out << "\"route\": [{" << endl;
                 ans.getLL(car_posi, car_longt, car_lat);
+                out << "\"type\": \"critical\"," << endl;
                 out << "\"lngt\": " << car_longt << "," << endl;
                 out << "\"lat\": " << car_lat << "}";
 
-                ans.getLL(start_no, tmp_longt, tmp_lat);
-                out << ",{" << endl;
-                out << "\"lngt\": " << tmp_longt << "," << endl;
-                out << "\"lat\": " << tmp_lat << "}";
-
-                for (int j = 0; j <= passen_num; j ++) {
-                    ans.getLL(passen_posi[new_way[j]], tmp_longt, tmp_lat);
+                ans.find_path(car_posi, start_no, order);
+                for (int j = 0; j < order.size() - 1; j ++) {
+                    ans.getLL(order[j], tmp_longt, tmp_lat);
                     out << ",{" << endl;
+                    out << "\"type\": \"casual\"," << endl;
                     out << "\"lngt\": " << tmp_longt << "," << endl;
                     out << "\"lat\": " << tmp_lat << "}";
                 }
 
-                out << "]" << endl;
+                ans.getLL(start_no, tmp_longt, tmp_lat);
+                out << ",{" << endl;
+                out << "\"type\": \"critical\"," << endl;
+                out << "\"lngt\": " << tmp_longt << "," << endl;
+                out << "\"lat\": " << tmp_lat << "}";
+
+                ans.find_path(start_no, passen_posi[new_way[0]], order);
+                for (int j = 0; j < order.size() - 1; j ++) {
+                    ans.getLL(order[j], tmp_longt, tmp_lat);
+                    out << ",{" << endl;
+                    out << "\"type\": \"casual\"," << endl;
+                    out << "\"lngt\": " << tmp_longt << "," << endl;
+                    out << "\"lat\": " << tmp_lat << "}";
+                }
+
+                for (int j = 0; j <= passen_num; j ++) {
+                    ans.getLL(passen_posi[new_way[j]], tmp_longt, tmp_lat);
+                    out << ",{" << endl;
+                    out << "\"type\": \"critical\"," << endl;
+                    out << "\"lngt\": " << tmp_longt << "," << endl;
+                    out << "\"lat\": " << tmp_lat << "}";
+
+                    if (j != passen_num) {
+                        ans.find_path(passen_posi[new_way[j]], passen_posi[new_way[j + 1]], order);
+                        for (int k = 0; k < order.size() - 1; k ++) {
+                            ans.getLL(order[k], tmp_longt, tmp_lat);
+                            out << ",{" << endl;
+                            out << "\"type\": \"casual\"," << endl;
+                            out << "\"lngt\": " << tmp_longt << "," << endl;
+                            out << "\"lat\": " << tmp_lat << "}";
+                        }
+                    }
+                }
+
+                out << "]," << endl;
+
+                out << "\"car_posi\": {\"lngt\":" << car_longt << ",\"lat\":"<< car_lat << "}," << endl;
+
+                out << "\"p_num\": " << passen_num + 1 << "," << endl;
+
+                out << "\"p_list\": [" << endl;
+                for (int j = 0; j <= passen_num; j ++) {
+                    ans.getLL(passen_posi[new_way[j]], tmp_longt, tmp_lat);
+                    out << "{\"lngt\":" << tmp_longt << ",\"lat\":"<< tmp_lat << "}";
+                    if (j != passen_num)
+                        out << "," << endl;
+                    else
+                        out << "]" << endl;
+                }
                 out << "}";
 
                 cout << "---------" << endl;

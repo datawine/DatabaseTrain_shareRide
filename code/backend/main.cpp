@@ -48,7 +48,18 @@ int main() {
     double tmp_lngt1, tmp_lat1, tmp_lngt2, tmp_lat2;
     double start_lngt, start_lat, dest_lngt, dest_lat; 
 
-    serverSock = initSocket();
+    tmp_lngt1 = 116.36306762695314;
+    tmp_lat1 = 39.95396438076642;
+    tmp_lngt2 = 116.37989044189455;
+    tmp_lat2 = 39.9123696621785;
+            start_no = ans.getClose(tmp_lngt1, tmp_lat1, start_lngt, start_lat);
+            dest_no = ans.getClose(tmp_lngt2, tmp_lat2, dest_lngt, dest_lat);
+
+            cout << "road_net_no:" << endl;
+            cout << start_no << " " << dest_no << endl;
+            genRes(ans, car_vec, rn_list, start_no, dest_no);
+
+/*    serverSock = initSocket();
     char revBuf[MAX_NUM]={0};
     char sedBuf[MAX_NUM]={0};
     string revMsg;
@@ -92,6 +103,6 @@ int main() {
         close(clientSock);
     }
     close(serverSock);
-
+*/
     return 0;
 }

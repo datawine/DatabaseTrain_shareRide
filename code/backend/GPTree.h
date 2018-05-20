@@ -39,5 +39,6 @@ public:
 	vector<int> getRange(int S, int R, vector<int>T);
 	int getClose(double longt, double lat, double &res_longt, double &res_lat);
 
+	int find_path(int S, int T, vector<int> &order);
 };
 #endif
