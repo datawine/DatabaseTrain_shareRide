@@ -101,8 +101,11 @@ void genRes(Ans &ans, vector<Car> &car_vec, vector<int> &rn_list, int start_no, 
             for (int j = 0; j <= passen_num; j ++) {
                 list[j] = j;
                 old_way[j] = j;
-            } 
-            calRoadDist(0, list, 0, passen_num - 1, d1, old_way);
+            }
+            if (passen_num == 0)
+                d1 = 0;
+            else
+                calRoadDist(0, list, 0, passen_num - 1, d1, old_way);
             d2 = ans.get_min_distance(car_posi, start_no);
             for (int j = 0; j <= passen_num; j ++) {
                 list[j] = j;
@@ -113,7 +116,7 @@ void genRes(Ans &ans, vector<Car> &car_vec, vector<int> &rn_list, int start_no, 
 
             if ((d2 + d3 - d1 <= 10000) and (d3 - d4 <= 10000)) {
                 cnt ++;
-                if (cnt == 21)
+                if (cnt == 6)
                     break;
                 if (!hasbefore)
                     out << "{" << endl;
@@ -174,19 +177,36 @@ void genRes(Ans &ans, vector<Car> &car_vec, vector<int> &rn_list, int start_no, 
 
                 out << "]," << endl;
 
+                out << "\"d1\": " << d1 << "," << endl;
+                out << "\"d2\": " << d2 << "," << endl;
+                out << "\"d3\": " << d3 << "," << endl;
+                out << "\"d4\": " << d4 << "," << endl;
+
                 out << "\"car_posi\": {\"lngt\":" << car_longt << ",\"lat\":"<< car_lat << "}," << endl;
 
                 out << "\"p_num\": " << passen_num + 1 << "," << endl;
 
+                out << "\"p_old_list\": [" << endl;
+                for (int j = 0; j < passen_num; j ++) {
+                    ans.getLL(passen_posi[old_way[j]], tmp_longt, tmp_lat);
+                    out << "{\"lngt\":" << tmp_longt << ",\"lat\":"<< tmp_lat << 
+                        ",\"roadnet_num\":" << passen_posi[old_way[j]] << "}";
+                    if (j != passen_num - 1)
+                        out << "," << endl;
+                }
+                out << "]," << endl;
+
                 out << "\"p_list\": [" << endl;
                 for (int j = 0; j <= passen_num; j ++) {
                     ans.getLL(passen_posi[new_way[j]], tmp_longt, tmp_lat);
-                    out << "{\"lngt\":" << tmp_longt << ",\"lat\":"<< tmp_lat << "}";
+                    out << "{\"lngt\":" << tmp_longt << ",\"lat\":"<< tmp_lat << 
+                        ",\"roadnet_num\":" << passen_posi[new_way[j]] << "}";
                     if (j != passen_num)
                         out << "," << endl;
                     else
                         out << "]" << endl;
                 }
+
                 out << "}";
 
                 cout << "---------" << endl;

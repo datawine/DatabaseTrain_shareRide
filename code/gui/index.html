@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="initial-scale=1.0, user-scalable=no, width=device-width">
-    <title>鼠标拾取地图坐标</title>
+    <title>拼车大作业</title>
     <link rel="stylesheet" href="http://cache.amap.com/lbs/static/main1119.css"/>
     <script src="jquery.min.js" type="text/javascript"></script>
     <script type="text/javascript"
@@ -99,7 +99,16 @@
     <table>
         <tr>
             <td>
-                <label>按关键字搜索：</label>
+                <label>输入起点经度：</label>
+            </td>
+            <td>
+                <label>输入起点纬度：</label>
+            </td>
+            <td>
+                <label>输入终点经度：</label>
+            </td>
+            <td>
+                <label>输入终点纬度：</label>
             </td>
             <td class="column2">
                 <label>左击获取经纬度：</label>
@@ -107,7 +116,16 @@
         </tr>
         <tr>
             <td>
-                <input type="text" placeholder="请输入关键字进行搜索" id="tipinput">
+                <input type="text" placeholder="输入起点经度" id="startlngt">
+            </td>
+            <td>
+                <input type="text" placeholder="输入起点纬度" id="startlat">
+            </td>
+            <td>
+                <input type="text" placeholder="输入终点经度" id="destlngt">
+            </td>
+            <td>
+                <input type="text" placeholder="输入终点纬度" id="destlat">
             </td>
             <td class="column2">
                 <input type="text" readonly="true" id="lnglat">
@@ -117,8 +135,10 @@
 </div>
 <div >
     <div class='button-group' style="background-color: #0d9bf2;right: 20px">
-        <input type="button" class="button" value="生成拼车结果" id="sendMsg"/>
+        <input type="button" class="button" value="按照文本框生成拼车结果" id="sendTextMsg"/>
+        <input type="button" class="button" value="按照点标记生成拼车结果" id="sendButtonMsg"/>
         <input type="button" class="button" value="画图" id="drawCar"/>
+        <input type="button" class="button" value="清空所有" id="clearMarker"/>
         <input type="checkbox" onclick="toggleScale(this)"/>比例尺
         <input type="checkbox" id="toolbar" onclick="toggleToolBar(this)"/>工具条
         <input type="checkbox" id="toolbarDirection" disabled onclick="toggleToolBarDirection(this)"/>工具条方向盘
@@ -129,6 +149,7 @@
 </div>
 <script>
     var routelist;
+    var markers = [];
 
     var net = require('net');
     var HOST = '127.0.0.1';
@@ -138,6 +159,7 @@
     // data是服务器发回的数据
     client.on('data', function(data) {
         console.log('DATA: ' + data);
+        alert("计算完毕！");
     });
 
     // 为客户端添加“close”事件处理函数
@@ -161,7 +183,8 @@
     });
  
     var map = new AMap.Map("container", {
-        resizeEnable: true
+        resizeEnable: true,
+        zoom: 11
     });
 
     map.addControl(scale);
@@ -288,7 +311,7 @@
         if (typeof(dest_marker) == "undefined") {
             dest_marker = new AMap.Marker({
                 map: map,
-                icon: "http://webapi.amap.com/theme/v1.3/markers/n/mark_b.png",
+                icon: "http://webapi.amap.com/theme/v1.3/markers/n/mark_r.png",
                 position: this.contextMenuPositon //基点位置
             });
         } else {
@@ -310,11 +333,40 @@
         this.contextMenu.close();
     }
 
-    AMap.event.addDomListener(document.getElementById('sendMsg'), 'click', function() {
+    AMap.event.addDomListener(document.getElementById('sendButtonMsg'), 'click', function() {
         client.write(start_marker.getPosition() + ',' + 
             dest_marker.getPosition());
     }, false);
     
+    AMap.event.addDomListener(document.getElementById('sendTextMsg'), 'click', function() {
+        var startlngt = document.getElementById("startlngt").value;
+        var startlat = document.getElementById("startlat").value;
+        var destlngt = document.getElementById("destlngt").value;
+        var destlat = document.getElementById("destlat").value;
+        console.log(start_marker);
+        if (typeof(start_marker) == "undefined") {
+                start_marker = new AMap.Marker({
+                map: map,
+                icon: "http://webapi.amap.com/theme/v1.3/markers/n/mark_r.png",
+                position: [startlngt, startlat] //基点位置
+            });
+        } else {
+            start_marker.setPosition([startlngt, startlat]);
+        }
+        console.log(dest_marker);
+        if (typeof(dest_marker) == "undefined") {
+            dest_marker = new AMap.Marker({
+                map: map,
+                icon: "http://webapi.amap.com/theme/v1.3/markers/n/mark_r.png",
+                position: [destlngt, destlat] //基点位置
+            });
+        } else {
+            dest_marker.setPosition([destlngt, destlat]);
+        }
+        client.write(start_marker.getPosition() + ',' + 
+            dest_marker.getPosition());
+    }, false);
+
     var infoWindow = new AMap.InfoWindow({offset: new AMap.Pixel(0, -30)});
 
     var contextMenu2 = new AMap.ContextMenu();
@@ -334,9 +386,9 @@
                     if (r[spot].type == "critical") {
                         var marker = new AMap.Marker({
                             map: map,
-                            icon: "http://webapi.amap.com/theme/v1.3/markers/n/mark_r.png",
                             position: [r[spot].lngt, r[spot].lat]//基点位置
                         });
+                        markers.push(marker);
                     }
                 }
                 var polyline = new AMap.Polyline({
@@ -348,6 +400,7 @@
                     strokeDasharray: [10, 5] //补充线样式
                 });
                 polyline.setMap(map);
+                markers.push(polyline);
             }
         }
     }, 0);
@@ -370,17 +423,33 @@
                                 "经度: " + routelist[route].car_posi.lat + "<br />" +
                                 "乘客数量: " + routelist[route].p_num + "<br />";
 
+                marker.content += "新路线: " + "<br />";
+
                 var plist = routelist[route].p_list;
                 for (var index in plist) {
                     marker.content += "乘客" + index + ": 纬度" + plist[index].lngt + " 经度" +
-                            plist[index].lat + "<br />";
+                            plist[index].lat + " 路网编号" + plist[index].roadnet_num + "<br />";
                 }
+
+                marker.content += "旧路线: " + "<br />";
+                var p_old_list = routelist[route].p_old_list;
+                for (var index in p_old_list) {
+                    marker.content += "乘客" + index + ": 纬度" + p_old_list[index].lngt + " 经度" +
+                            p_old_list[index].lat + " 路网编号" + p_old_list[index].roadnet_num + "<br />";
+                }
+
+                marker.content += "d1: " + routelist[route].d1 + "<br />";
+                marker.content += "d2: " + routelist[route].d2 + "<br />";
+                marker.content += "d3: " + routelist[route].d3 + "<br />";
+                marker.content += "d4: " + routelist[route].d4 + "<br />";
+
                 marker.on('rightclick', function(e) {
                     contextMenu2.open(map, e.lnglat);
                     contextMenuPositon = e.target.F.position;
                 });
                 marker.on('click', markerClick);
                 marker.emit('click', {target: marker});
+                markers.push(marker);
                 break;
             }
         }
@@ -390,6 +459,11 @@
         infoWindow.setContent(e.target.content);
         infoWindow.open(map, e.target.getPosition());
     }
+
+    AMap.event.addDomListener(document.getElementById('clearMarker'), 'click', function() {
+        map.remove(markers);
+        markers = [];
+    }, false);
 
 </script>
 
